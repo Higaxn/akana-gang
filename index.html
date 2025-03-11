@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AKANAGANG</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: url('https://cdn.discordapp.com/attachments/1270038693167763577/1337050861129695284/image.png?ex=67d03926&is=67cee7a6&hm=e3aadf28fadaea50b3a699b3ce28d8803be90e154e68241f54cd9f38263d6e79&') no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            transition: background-image 0.5s ease-in-out;
+        }
+
+        /* กล่องภายในเนื้อหาหลัก */
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: rgba(158, 158, 158, 0.8); /* ทำให้พื้นหลังโปร่งแสง */
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 50px;
+        }
+
+        h1, h2, h3 {
+            color: #8d56c0;
+            text-align: center;
+            margin-top: 0;
+            font-size: 30px;
+        }
+
+        /* ฟอร์มการบันทึก */
+        form {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        input, select {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        button {
+            padding: 12px 20px;
+            background-color: #8d56c0;
+            color: white;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #8d56c0;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            background-color: #8d56c0;
+            padding: 10px;
+            margin: 10px 0;
+            border-left: 5px solid #8d56c0;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        li:nth-child(even) {
+            background-color: #8d56c0;
+        }
+
+        .total-list li {
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .formatted-number {
+            font-weight: bold;
+            color: #8d56c0;
+        }
+
+        /* ปรับการแสดงผลในมือถือ */
+        @media (max-width: 768px) {
+            .container {
+                width: 90%;
+            }
+
+            h1, h2, h3 {
+                font-size: 22px;
+            }
+
+            button {
+                font-size: 14px;
+            }
+        }
+
+        /* สไตล์สำหรับการเลือกเปลี่ยนพื้นหลัง */
+        .background-selector {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .background-selector select {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            background-color: #fff;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>AKANA LIST</h1>
+        
+        <form id="recordForm">
+            <label for="item">ชื่อรายการ:</label>
+            <input type="text" id="item" name="item" required><br><br>
+            
+            <label for="quantity">จำนวน:</label>
+            <input type="number" id="quantity" name="quantity" required><br><br>
+            
+            <label for="operation">การดำเนินการ:</label>
+            <select id="operation" name="operation" required>
+                <option value="add">บวก</option>
+                <option value="subtract">ลบ</option>
+            </select><br><br>
+            
+            <button type="submit">บันทึก</button>
+        </form>
+        
+        <h2>รายการที่ลง:</h2>
+        <ul id="recordList"></ul>
+        
+        <h3>ของรวมทั้งหมด:</h3>
+        <ul id="totalList" class="total-list"></ul>
+
+        <div class="background-selector">
+            <label for="backgroundSelect">เลือกภาพพื้นหลัง:</label>
+            <select id="backgroundSelect">
+                <option value="https://images.unsplash.com/photo-1521747116042-5c8d2d0f85ab">ธรรมชาติ</option>
+                <option value="https://images.unsplash.com/photo-1593642532973-d31b6557fa68">เมือง</option>
+                <option value="https://images.unsplash.com/photo-1497218262061-409b1955a23c">ทะเล</option>
+                <option value="https://images.unsplash.com/photo-1504594663331-d68974060f39">ภูเขา</option>
+            </select>
+        </div>
+    </div>
+
+    <script>
+        // ฟังก์ชันในการแสดงหลักของจำนวน (หมื่น, พัน, ร้อย ฯลฯ)
+        function formatNumber(num) {
+            return num.toLocaleString('th-TH');
+        }
+
+        // ฟังก์ชันเพื่ออัปเดตยอดรวมของแต่ละรายการ
+        function updateTotalList(recordData) {
+            const totalList = document.getElementById('totalList');
+            totalList.innerHTML = ''; // ลบข้อมูลเก่าก่อนที่จะเพิ่มใหม่
+
+            for (const item in recordData) {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${item}: ${formatNumber(recordData[item])} ชิ้น`;
+                totalList.appendChild(listItem);
+            }
+        }
+
+        // ฟังก์ชันในการโหลดข้อมูลจาก LocalStorage
+        function loadData() {
+            const savedData = localStorage.getItem('recordData');
+            if (savedData) {
+                return JSON.parse(savedData);
+            } else {
+                return {};
+            }
+        }
+
+        // ฟังก์ชันในการบันทึกข้อมูลลงใน LocalStorage
+        function saveData(recordData) {
+            localStorage.setItem('recordData', JSON.stringify(recordData));
+        }
+
+        // โหลดข้อมูลเมื่อหน้าเว็บถูกโหลด
+        let recordData = loadData();
+        updateTotalList(recordData);
+
+        document.getElementById('recordForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const item = document.getElementById('item').value;
+            const quantity = parseInt(document.getElementById('quantity').value);
+            const operation = document.getElementById('operation').value;
+            
+            if (item && quantity) {
+                // ตรวจสอบว่ารายการนี้มีอยู่ใน recordData หรือไม่
+                if (recordData[item]) {
+                    // ถ้ามีการบันทึกก่อนหน้านี้แล้ว
+                    if (operation === 'add') {
+                        recordData[item] += quantity;  // เพิ่มจำนวน
+                    } else if (operation === 'subtract') {
+                        recordData[item] -= quantity; // ลดจำนวน
+                    }
+                } else {
+                    // ถ้ายังไม่เคยบันทึก, สร้างข้อมูลใหม่
+                    if (operation === 'add') {
+                        recordData[item] = quantity;
+                    } else if (operation === 'subtract') {
+                        recordData[item] = -quantity;
+                    }
+                }
+
+                // เพิ่มรายการลงในลิสต์
+                const recordList = document.getElementById('recordList');
+                const listItem = document.createElement('li');
+                listItem.textContent = `${item}: ${operation === 'add' ? '+' : '-'} ${formatNumber(quantity)} ชิ้น`;
+                recordList.appendChild(listItem);
+
+                // อัปเดตยอดรวมของแต่ละรายการ
+                updateTotalList(recordData);
+
+                // บันทึกข้อมูลลงใน LocalStorage
+                saveData(recordData);
+
+                // เคลียร์ฟอร์ม
+                document.getElementById('item').value = '';
+                document.getElementById('quantity').value = '';
+                document.getElementById('operation').value = 'add';
+            }
+        });
+
+        // ฟังก์ชันสำหรับการเปลี่ยนภาพพื้นหลัง
+        document.getElementById('backgroundSelect').addEventListener('change', function(event) {
+            const selectedBackground = event.target.value;
+            document.body.style.backgroundImage = `url(${selectedBackground})`;
+        });
+    </script>
+
+</body>
+</html>
